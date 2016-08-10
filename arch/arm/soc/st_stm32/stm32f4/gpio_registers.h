@@ -14,12 +14,30 @@
  * limitations under the License.
  */
 
-#ifndef _STM32F4_SOC_REGISTERS_H_
-#define _STM32F4_SOC_REGISTERS_H_
+#ifndef _STM32F4X_GPIO_REGISTERS_H_
+#define _STM32F4X_GPIO_REGISTERS_H_
 
-/* include register mapping headers */
-#include "rcc_registers.h"
-#include "flash_registers.h"
-#include "gpio_registers.h"
+/**
+ * @brief Driver for GPIO of STM32F4X family processor.
+ *
+ * Based on reference manual:
+ *   RM0368 Reference manual STM32F401xB/C and STM32F401xD/E
+ *   advanced ARM ® -based 32-bit MCUs
+ *
+ * Chapter 8: General-purpose I/Os (GPIOs)
+ */
 
-#endif /* _STM32F4_SOC_REGISTERS_H_ */
+/* 8.4 GPIO registers - each GPIO port controls 16 pins */
+struct stm32f4x_gpio {
+	uint32_t mode;
+	uint32_t otype;
+	uint32_t ospeed;
+	uint32_t pupdr;
+	uint32_t idr;
+	uint32_t odr;
+	uint32_t bsr;
+	uint32_t lck;
+	uint32_t afr[2];
+};
+
+#endif /* _STM32F4X_GPIO_REGISTERS_H_ */
