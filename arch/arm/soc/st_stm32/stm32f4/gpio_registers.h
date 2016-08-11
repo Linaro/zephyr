@@ -40,4 +40,23 @@ struct stm32f4x_gpio {
 	uint32_t afr[2];
 };
 
+union __syscfg_exticr {
+	uint32_t val;
+	struct {
+		uint16_t rsvd__16_31;
+		uint16_t exti;
+	} bit;
+};
+
+/* 7.2 SYSCFG registers */
+struct stm32f4x_syscfg {
+	uint32_t memrmp;
+	uint32_t pmc;
+	union __syscfg_exticr exticr1;
+	union __syscfg_exticr exticr2;
+	union __syscfg_exticr exticr3;
+	union __syscfg_exticr exticr4;
+	uint32_t cmpcr;
+};
+
 #endif /* _STM32F4X_GPIO_REGISTERS_H_ */

@@ -68,6 +68,9 @@
 /* FLASH */
 #define FLASH_R_BASE          (AHB1PERIPH_BASE + 0x3C00)
 
+/* SYSCFG */
+#define SYSCFG_BASE           (APB2PERIPH_BASE + 0x3800)
+
 #ifndef _ASMLANGUAGE
 
 #include <device.h>
