@@ -62,7 +62,12 @@ static void set_baud_rate(struct device *dev, uint32_t rate)
 	 * peripheral. Ask clock_control for the current clock rate of
 	 * our peripheral.
 	 */
+#ifdef CONFIG_SOC_SERIES_STM32F1X
 	clock_control_get_rate(data->clock, cfg->clock_subsys, &clock);
+#elif CONFIG_SOC_SERIES_STM32F4X
+	clock_control_get_rate(data->clock,
+			(clock_control_subsys_t *) &cfg->pclken, &clock);
+#endif
 
 	/* baud rate calculation:
 	 *
@@ -286,7 +291,11 @@ static int uart_stm32_init(struct device *dev)
 	__uart_stm32_get_clock(dev);
 
 	/* enable clock */
+#ifdef CONFIG_SOC_SERIES_STM32F1X
 	clock_control_on(data->clock, cfg->clock_subsys);
+#elif CONFIG_SOC_SERIES_STM32F4X
+	clock_control_on(data->clock, (clock_control_subsys_t *) &cfg->pclken);
+#endif
 
 	/* FIXME: hardcoded, clear stop bits */
 	uart->cr2.bit.stop = 0;
@@ -331,8 +340,9 @@ static struct uart_stm32_config uart_stm32_dev_cfg_0 = {
 #ifdef CONFIG_SOC_SERIES_STM32F1X
 	.clock_subsys = UINT_TO_POINTER(STM32F10X_CLOCK_SUBSYS_USART1),
 #elif CONFIG_SOC_SERIES_STM32F4X
-	.clock_subsys = UINT_TO_POINTER(STM32F40X_CLOCK_SUBSYS_USART1),
-#endif	/* CONFIG_SOC_SERIES_STM32F4X */
+	.pclken = { .bus = STM32F4X_CLOCK_BUS_APB2,
+		    .enr = STM32F4X_CLOCK_ENABLE_USART1 },
+#endif	/* CONFIG_SOC_SERIES_STM32FX */
 };
 
 static struct uart_stm32_data uart_stm32_dev_data_0 = {
@@ -379,8 +389,9 @@ static struct uart_stm32_config uart_stm32_dev_cfg_1 = {
 #ifdef CONFIG_SOC_SERIES_STM32F1X
 	.clock_subsys = UINT_TO_POINTER(STM32F10X_CLOCK_SUBSYS_USART2),
 #elif CONFIG_SOC_SERIES_STM32F4X
-	.clock_subsys = UINT_TO_POINTER(STM32F40X_CLOCK_SUBSYS_USART2),
-#endif	/* CONFIG_SOC_SERIES_STM32F4X */
+	.pclken = { .bus = STM32F4X_CLOCK_BUS_APB1,
+		    .enr = STM32F4X_CLOCK_ENABLE_USART2 },
+#endif	/* CONFIG_SOC_SERIES_STM32FX */
 };
 
 static struct uart_stm32_data uart_stm32_dev_data_1 = {
