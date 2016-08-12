@@ -239,7 +239,15 @@ int stm32_gpio_enable_int(int port, int pin)
 	volatile struct stm32f4x_syscfg *syscfg =
 		(struct stm32f4x_syscfg *)SYSCFG_BASE;
 	volatile union __syscfg_exticr *exticr;
+	struct device *clk = device_get_binding(STM32_CLOCK_CONTROL_NAME);
+	struct stm32f4x_pclken pclken = {
+		.bus = STM32F4X_CLOCK_BUS_APB2,
+		.enr = STM32F4X_CLOCK_ENABLE_SYSCFG
+	};
 	int shift = 0;
+
+	/* Enable SYSCFG clock */
+	clock_control_on(clk, (clock_control_subsys_t *) &pclken);
 
 	if (pin <= 3) {
 		exticr = &syscfg->exticr1;
