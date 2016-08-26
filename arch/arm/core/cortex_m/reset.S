@@ -57,6 +57,25 @@ SECTION_SUBSEC_FUNC(TEXT,_reset_section,__reset)
  */
 SECTION_SUBSEC_FUNC(TEXT,_reset_section,__start)
 
+#if defined(CONFIG_SOC_SERIES_NRF51X)
+    /* Make sure to enable all banks via the RAMON register.
+     * nF51822 Product Anomaly Notice (PAN) #16
+     */
+    /* ROM A */
+    ldr r0, =0x40000524
+    ldr r2, [r0]
+    movs r1, #0x3
+    orrs r2, r2, r1
+    str r2, [r0]
+
+    /* ROM B */
+    ldr r0, =0x40000554
+    ldr r2, [r0]
+    movs r1, #0x3
+    orrs r2, r2, r1
+    str r2, [r0]
+#endif
+
     /* lock interrupts: will get unlocked when switch to main task */
 #if defined(CONFIG_ARMV6_M)
     cpsid i
