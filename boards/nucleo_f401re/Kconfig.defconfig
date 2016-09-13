@@ -20,4 +20,7 @@ if BOARD_NUCLEO_F401RE
 config BOARD
 	default nucleo_f401re
 
+config SPI
+	def_bool y
+
 endif # BOARD_NUCLEO_F401RE
