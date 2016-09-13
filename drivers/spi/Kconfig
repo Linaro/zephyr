@@ -33,6 +33,14 @@ config SPI_QMSI_SS
 	  SPI driver implementation using QMSI library. This instance is
 	  for the Sensor Subsystem.
 
+config SPI_STM32
+	bool
+	prompt "STMicroelectronics STM32Fx SPI controller driver"
+	depends on SPI && SOC_FAMILY_STM32
+	default n
+	help
+	  Enable support for STMicroelectronics STM32Fx SPI controllers.
+
 config SPI_INTEL
 	bool
 	prompt "Intel SPI controller driver"
