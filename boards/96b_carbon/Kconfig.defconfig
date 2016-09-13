@@ -20,4 +20,7 @@ if BOARD_96B_CARBON
 config BOARD
 	default 96b_carbon
 
+config SPI
+	def_bool y
+
 endif # BOARD_96B_CARBON
