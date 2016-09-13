@@ -42,6 +42,13 @@
 #define USART2_ADDR           (APB1PERIPH_BASE + 0x4400)
 #define USART6_ADDR           (APB2PERIPH_BASE + 0x1400)
 
+/* SPI */
+#define SPI_REG_SIZE         0x400
+#define SPI1_ADDR             (APB2PERIPH_BASE + 0x3000)
+#define SPI4_ADDR             (APB2PERIPH_BASE + 0x3400)
+#define SPI2_ADDR             (APB1PERIPH_BASE + 0x3800)
+#define SPI3_ADDR             (APB1PERIPH_BASE + 0x3C00)
+
 /* Reset and Clock Control */
 #define RCC_BASE              (AHB1PERIPH_BASE + 0x3800)
 

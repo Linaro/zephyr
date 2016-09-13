@@ -51,6 +51,14 @@ config SPI_K64
 	help
 	  Enable support for Freescale K64-based SPI controllers.
 
+config SPI_STM32
+	bool
+	prompt "STMicroelectronics STM32Fx SPI controller driver"
+	depends on SPI && SOC_FAMILY_STM32
+	default n
+	help
+	  Enable support for STMicroelectronics STM32Fx SPI controllers.
+
 config SPI_INTEL
 	bool
 	prompt "Intel SPI controller driver"
