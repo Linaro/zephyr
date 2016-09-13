@@ -283,4 +283,6 @@ source "drivers/spi/Kconfig.dw"
 
 source "drivers/spi/Kconfig.mcux"
 
+source "drivers/spi/Kconfig.nrf5"
+
 endif # SPI
