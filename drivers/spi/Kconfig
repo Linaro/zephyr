@@ -84,6 +84,16 @@ config SYS_LOG_SPI_LEVEL
 	  3 INFO, write SYS_LOG_INF in adition to previous levels
 	  4 DEBUG, write SYS_LOG_DBG in adition to previous levels
 
+config SPI_SLAVE
+	bool
+	prompt "Enable slave mode"
+	default n
+	help
+	  Enable the driver in slave mode. This option simply gives a
+	  hint to the platform driver that slave mode is required - it
+	  is upto the platform driver to implement slave mode.
+	  If in doubt, keep this disabled.
+
 config SPI_CS_GPIO
 	bool "SPI port CS pin is controlled via a GPIO port"
 	depends on GPIO
