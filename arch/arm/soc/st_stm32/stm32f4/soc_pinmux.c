@@ -45,6 +45,7 @@ static const stm32_pin_func_t pin_pa3_funcs[] = {
 static const stm32_pin_func_t pin_pa0_funcs[] = {
 	[STM32F4_PINMUX_FUNC_PA0_PWM2_CH1 - 1] =
 			STM32F4X_PIN_CONFIG_AF_PUSH_UP,
+};
 
 static const stm32_pin_func_t pin_pa4_funcs[] = {
 	[STM32F4_PINMUX_FUNC_PA4_SPI1_NSS - 1] =
