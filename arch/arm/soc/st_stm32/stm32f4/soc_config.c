@@ -52,6 +52,46 @@ static const stm32_pin_func_t pin_pa3_funcs[] = {
 			STM32F4X_PIN_CONFIG_AF_PUSH_UP,
 };
 
+static const stm32_pin_func_t pin_pa4_funcs[] = {
+	[STM32F4_PINMUX_FUNC_PA4_SPI1_NSS - 1] =
+			STM32F4X_PIN_CONFIG_AF_PUSH_PULL,
+};
+
+static const stm32_pin_func_t pin_pa5_funcs[] = {
+	[STM32F4_PINMUX_FUNC_PA5_SPI1_SCK - 1] =
+			STM32F4X_PIN_CONFIG_AF_PUSH_PULL,
+};
+
+static const stm32_pin_func_t pin_pa6_funcs[] = {
+	[STM32F4_PINMUX_FUNC_PA6_SPI1_MISO - 1] =
+			STM32F4X_PIN_CONFIG_AF_PUSH_PULL,
+};
+
+static const stm32_pin_func_t pin_pa7_funcs[] = {
+	[STM32F4_PINMUX_FUNC_PA7_SPI1_MOSI - 1] =
+			STM32F4X_PIN_CONFIG_AF_PUSH_PULL,
+};
+
+static const stm32_pin_func_t pin_pb12_funcs[] = {
+	[STM32F4_PINMUX_FUNC_PB12_SPI2_NSS - 1] =
+			STM32F4X_PIN_CONFIG_AF_PUSH_PULL,
+};
+
+static const stm32_pin_func_t pin_pb13_funcs[] = {
+	[STM32F4_PINMUX_FUNC_PB13_SPI2_SCK - 1] =
+			STM32F4X_PIN_CONFIG_AF_PUSH_PULL,
+};
+
+static const stm32_pin_func_t pin_pb14_funcs[] = {
+	[STM32F4_PINMUX_FUNC_PB14_SPI2_MISO - 1] =
+			STM32F4X_PIN_CONFIG_AF_PUSH_PULL,
+};
+
+static const stm32_pin_func_t pin_pb15_funcs[] = {
+	[STM32F4_PINMUX_FUNC_PB15_SPI2_MOSI - 1] =
+			STM32F4X_PIN_CONFIG_AF_PUSH_PULL,
+};
+
 /**
  * @brief pin configuration
  */
@@ -62,6 +102,14 @@ static struct stm32_pinmux_conf pins[] = {
 	STM32_PIN_CONF(STM32_PIN_PB7, pin_pb7_funcs),
 	STM32_PIN_CONF(STM32_PIN_PA2, pin_pa2_funcs),
 	STM32_PIN_CONF(STM32_PIN_PA3, pin_pa3_funcs),
+	STM32_PIN_CONF(STM32_PIN_PA4, pin_pa4_funcs),
+	STM32_PIN_CONF(STM32_PIN_PA5, pin_pa5_funcs),
+	STM32_PIN_CONF(STM32_PIN_PA6, pin_pa6_funcs),
+	STM32_PIN_CONF(STM32_PIN_PA7, pin_pa7_funcs),
+	STM32_PIN_CONF(STM32_PIN_PB12, pin_pb12_funcs),
+	STM32_PIN_CONF(STM32_PIN_PB13, pin_pb13_funcs),
+	STM32_PIN_CONF(STM32_PIN_PB14, pin_pb14_funcs),
+	STM32_PIN_CONF(STM32_PIN_PB15, pin_pb15_funcs),
 };
 
 int stm32_get_pin_config(int pin, int func)
