@@ -83,6 +83,33 @@ config BLUETOOTH_UART_TO_HOST_DEV_NAME
 	  to connect to an external Bluetooth Host when Zephyr is
 	  acting as a Bluetooth Controller.
 
+config BLUETOOTH_SPI_TO_HOST_DEV_NAME
+	string "Device Name of SPI Device to an external Bluetooth Host"
+	default "SPI_0"
+	depends on SPI && BLUETOOTH_HCI_RAW
+	help
+	  This option specifies the name of SPI device to be used to connect
+	  to an external Bluetooth Host when Zephyr is acting as a Bluetooth
+	  Controller.
+
+config BLUETOOTH_SPI_TO_HOST_IRQ_DEV_NAME
+	string "Device Name of SPI IRQ to an external Bluetooth Host"
+	default "GPIO_0"
+	depends on SPI && BLUETOOTH_HCI_RAW
+	help
+	  This option specifies the name of SPI IRQ device to be used to
+	  notify an external Bluetooth Host when Zephyr is acting as a
+	  Bluetooth Controller.
+
+config BLUETOOTH_SPI_TO_HOST_IRQ_PIN
+	int "SPI IRQ line number to an external Bluetooth Host"
+	default 0
+	depends on SPI && BLUETOOTH_HCI_RAW
+	help
+	  This option specifies the IRQ line number to be used to notify
+	  an external Bluetooth Host when Zephyr is acting as a Bluetooth
+	  Controller.
+
 config BLUETOOTH_RX_STACK_SIZE
 	int "Size of the receiving thread stack"
 	depends on BLUETOOTH_HCI_HOST || BLUETOOTH_RECV_IS_RX_THREAD
