@@ -32,6 +32,10 @@ config BLUETOOTH_UART
 	bool
 	default n
 
+config BLUETOOTH_SPI
+	bool
+	default n
+
 choice
 	prompt "Bluetooth HCI driver"
 	default BLUETOOTH_H4
@@ -57,6 +61,15 @@ config BLUETOOTH_H5
 	help
 	  Bluetooth three-wire (H:5) UART driver. Implementation of HCI
 	  Three-Wire UART Transport Layer.
+
+config BLUETOOTH_SPI_TRANSPORT
+	bool "SPI transport for Bluetooth"
+	select SPI
+	select BLUETOOTH_SPI
+	select BLUETOOTH_HOST_BUFFERS
+	help
+	  Bluetooth SPI driver. Requires additional 2 gpio pins for
+	  communication with the slave (request and ready).
 
 config BLUETOOTH_CONTROLLER
 	bool "Controller"
@@ -86,7 +99,7 @@ config BLUETOOTH_HOST_BUFFERS
 
 config	BLUETOOTH_DEBUG_DRIVER
 	bool "Bluetooth driver debug"
-	depends on BLUETOOTH_DEBUG && (BLUETOOTH_UART || BLUETOOTH_CONTROLLER)
+	depends on BLUETOOTH_DEBUG && (BLUETOOTH_UART || BLUETOOTH_SPI_TRANSPORT || BLUETOOTH_CONTROLLER)
 	default n
 	help
 	  This option enables debug support for the chosen
@@ -99,6 +112,17 @@ config BLUETOOTH_UART_ON_DEV_NAME
 	help
 	  This option specifies the name of UART device to be used
 	  for Bluetooth.
+
+config BLUETOOTH_SPI_ON_DEV_NAME
+	string "Device Name of SPI Device for Bluetooth"
+	default "SPI_0"
+	depends on BLUETOOTH_SPI || BLUETOOTH_STACK_HCI_RAW
+	help
+	  This option specifies the name of SPI device to be used for Bluetooth.
+	  On the controller side, this SPI device is used to encapsulate the
+	  RAW HCI frames to send further up the stack. On the BLE stack side,
+	  this device is used to reply back with HCI frames that are sent over
+	  the air.
 
 # Headroom that the driver needs for sending and receiving buffers.
 # Add a new 'default' entry for each new driver.
