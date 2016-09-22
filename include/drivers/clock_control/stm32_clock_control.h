@@ -23,6 +23,12 @@
 
 #ifdef CONFIG_SOC_SERIES_STM32F1X
 #include "stm32f1_clock_control.h"
+#elif CONFIG_SOC_SERIES_STM32F4X
+#include "stm32f4_clock_control.h"
+#endif
+
+#ifdef CONFIG_SOC_SERIES_STM32F4X
+#include "stm32f4_clock_control.h"
 #endif
 
 #endif /* _STM32_CLOCK_CONTROL_H_ */
