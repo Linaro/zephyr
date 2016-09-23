@@ -18,31 +18,34 @@
 #include <device.h>
 #include <gpio.h>
 
-/**
- * the demo assumes use of nucleo_f103rb board, adjust defines below
- * to fit your board
- */
-
-/* we're going to use PB8 and PB5 */
-#define PORT "GPIOB"
-/* PB5 */
+#if defined(CONFIG_BOARD_96B_CARBON)
+#define PORT_LED1	"GPIOD"
+#define PORT_LED2	"GPIOB"
+#define LED1 2
+#define LED2 5
+#else
+/* default assumes nucleo_f103rb board */
+#define PORT_LED1	"GPIOB"
+#define PORT_LED2	"GPIOB"
 #define LED1 5
-/* PB8 */
 #define LED2 8
+#endif
 
 void main(void)
 {
 	int cnt = 0;
-	struct device *gpiob;
+	struct device *gpio_dev_1;
+	struct device *gpio_dev_2;
 
-	gpiob = device_get_binding(PORT);
+	gpio_dev_1 = device_get_binding(PORT_LED1);
+	gpio_dev_2 = device_get_binding(PORT_LED2);
 
-	gpio_pin_configure(gpiob, LED1, GPIO_DIR_OUT);
-	gpio_pin_configure(gpiob, LED2, GPIO_DIR_OUT);
+	gpio_pin_configure(gpio_dev_1, LED1, GPIO_DIR_OUT);
+	gpio_pin_configure(gpio_dev_2, LED2, GPIO_DIR_OUT);
 
 	while (1) {
-		gpio_pin_write(gpiob, LED1, cnt % 2);
-		gpio_pin_write(gpiob, LED2, (cnt + 1) % 2);
+		gpio_pin_write(gpio_dev_1, LED1, cnt % 2);
+		gpio_pin_write(gpio_dev_2, LED2, (cnt + 1) % 2);
 		task_sleep(SECONDS(1));
 		cnt++;
 	}
