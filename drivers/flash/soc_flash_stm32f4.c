@@ -26,20 +26,19 @@
 
 #include <flash_registers.h>
 
-static const struct flash_map {
-      uint32_t start;
-      uint32_t len;
-      uint16_t id;
+static struct flash_map {
+	uint32_t start;
+	const uint32_t len;
+	const uint16_t id;
 } sector [] = {
-	/* TODO: investigate why sector 0 is not accessible */
-	{ .start = 0x08000000 , .len = KB(16),   .id = 0x0000 },
-	{ .start = 0x08004000 , .len = KB(16),   .id = 0x0008 },
-	{ .start = 0x08008000 , .len = KB(16),   .id = 0x0010 },
-	{ .start = 0x0800c000 , .len = KB(16),   .id = 0x0018 },
-	{ .start = 0x08010000 , .len = KB(64),   .id = 0x0020 },
-	{ .start = 0x08020000 , .len = KB(128),  .id = 0x0028 },
-	{ .start = 0x08040000 , .len = KB(128),  .id = 0x0030 },
-	{ .start = 0x08060000 , .len = KB(128),  .id = 0x0038 },
+	{ .len = KB(16),   .id = 0x0000 },
+	{ .len = KB(16),   .id = 0x0008 },
+	{ .len = KB(16),   .id = 0x0010 },
+	{ .len = KB(16),   .id = 0x0018 },
+	{ .len = KB(64),   .id = 0x0020 },
+	{ .len = KB(128),  .id = 0x0028 },
+	{ .len = KB(128),  .id = 0x0030 },
+	{ .len = KB(128),  .id = 0x0038 },
 };
 
 #define MAX_OFFSET  (sector[ARRAY_SIZE(sector) - 1].len + \
@@ -163,6 +162,7 @@ static int erase_sector(uint16_t sector, struct stm32f4x_flash *regs)
 	while (regs->status & FLASH_FLAG_BSY) {
 		continue;
 	}
+
 	rc = wait_flash_idle(regs);
 	if (rc < 0) {
 		SYS_LOG_ERR("erasing sector");
@@ -255,6 +255,12 @@ static struct flash_driver_api flash_stm32f4_api = {
 static int stm32f4_flash_init(struct device *dev)
 {
 	struct flash_priv *p = dev->driver_data;
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(sector); i++) {
+		sector[i].start = CONFIG_FLASH_BASE_ADDRESS +
+			i * sector[i - 1].len;
+	}
 
 	nano_sem_init(&p->sem);
 	nano_sem_give(&p->sem);
