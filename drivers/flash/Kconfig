@@ -132,6 +132,20 @@ config SOC_FLASH_NRF5_DEV_NAME
 	help
 	  Specify the device name for the flash driver.
 
+config SOC_FLASH_STM32F4
+	bool "ST STM32F4xx flash driver"
+	depends on FLASH && SOC_FAMILY_STM32
+	default n
+	help
+	  Enables STM32F4 Flash driver
+
+config SOC_FLASH_STM32F4_DEV_NAME
+	string "ST STM32F4 flash device name"
+	depends on SOC_FLASH_STM32F4
+	default "STM32F4_FLASH"
+	help
+	  Specify the device name for the flash driver.
+
 config SOC_FLASH_QMSI_API_REENTRANCY
 	bool
 	prompt "flash driver API reentrancy for QMSI shim driver"
