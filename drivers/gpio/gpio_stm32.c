@@ -242,9 +242,7 @@ DEVICE_AND_API_INIT(gpio_stm32_## __suffix,				\
 		    &gpio_stm32_cfg_## __suffix,			\
 		    SECONDARY,						\
 		    CONFIG_KERNEL_INIT_PRIORITY_DEVICE,			\
-		    &gpio_stm32_driver);				\
-GPIO_SETUP_COMPAT_DEV(gpio_stm32_## __suffix)
-
+		    &gpio_stm32_driver);
 #endif
 
 #ifdef CONFIG_GPIO_STM32_PORTA
