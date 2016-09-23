@@ -7,6 +7,7 @@
 #ifndef _STM32F4X_FLASH_REGISTERS_H_
 #define _STM32F4X_FLASH_REGISTERS_H_
 
+#define SECTOR_MASK				((uint32_t)0xFFFFFF07)
 /**
  * @brief
  *
@@ -59,6 +60,11 @@ static inline void __setup_flash(void)
 	uint32_t tmpreg = 0;
 
 	regs = (struct stm32f4x_flash *) FLASH_R_BASE;
+
+	if (regs->ctrl & FLASH_CR_LOCK) {
+		regs->key = FLASH_KEY1;
+		regs->key = FLASH_KEY2;
+	}
 
 	if (CONFIG_SYS_CLOCK_HW_CYCLES_PER_SEC <= 30000000) {
 		regs->acr.bit.latency = STM32F4X_FLASH_LATENCY_0;
