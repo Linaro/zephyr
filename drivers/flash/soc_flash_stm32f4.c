@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <misc/sys_log.h>
 #include <nanokernel.h>
 #include <device.h>
@@ -31,7 +30,6 @@ static const struct flash_map {
       uint32_t len;
       uint16_t id;
 } sector [] = {
-	/* TODO: investigate why sector 0 is not accessible */
 	{ .start = 0x08000000 , .len = KB(16),   .id = 0x0000 },
 	{ .start = 0x08004000 , .len = KB(16),   .id = 0x0008 },
 	{ .start = 0x08008000 , .len = KB(16),   .id = 0x0010 },
@@ -160,7 +158,7 @@ static int erase_sector(uint16_t sector, struct stm32f4x_flash *regs)
 	tmp = regs->ctrl;
 	regs->ctrl |= FLASH_CR_STRT;
 
-	while (regs->status & FLASH_FLAG_BSY) {
+ 	while (regs->status & FLASH_FLAG_BSY) {
 		continue;
 	}
 	rc = wait_flash_idle(regs);
