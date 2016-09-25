@@ -31,11 +31,6 @@ static const struct flash_map {
 	uint32_t start;
 	uint32_t len;
 } sector [] = {
-#if 0
-	/* enable when the driver can access the first sector without
-	 * locking up
-	 */
-
 	{ .start = 0x0000000 , .len = KB(16) },
 	{ .start = 0x0004000 , .len = KB(16) },
 	{ .start = 0x0008000 , .len = KB(16) },
@@ -44,16 +39,6 @@ static const struct flash_map {
 	{ .start = 0x0020000 , .len = KB(128) },
 	{ .start = 0x0040000 , .len = KB(128) },
 	{ .start = 0x0060000 , .len = KB(128) },
-#else
-	{ .start = 0x0000000 , .len = KB(16) },
-	{ .start = 0x0004000 , .len = KB(16) },
-	{ .start = 0x0008000 , .len = KB(16) },
-	{ .start = 0x000c000 , .len = KB(64) },
-	{ .start = 0x001c000 , .len = KB(128) },
-	{ .start = 0x003c000 , .len = KB(128) },
-	{ .start = 0x005c000 , .len = KB(128) },
-#endif
-
 };
 
 static const  uint8_t val = 0xA5;
@@ -73,7 +58,22 @@ static char *STR(uint32_t len)
 		return "    ";
 	}
 }
+static char *sstrstr(char *haystack, char *needle, size_t length)
+{
+	size_t needle_length = strlen(needle);
+	size_t i;
 
+	for (i = 0; i < length; i++) {
+		if (i + needle_length > length) {
+			return NULL;
+		}
+
+		if (strncmp(&haystack[i], needle, needle_length) == 0) {
+			return &haystack[i];
+		}
+	}
+	return NULL;
+}
 static void test_access(struct device *flash_dev, int i)
 {
 	uint32_t len = sector[i].len, offset = 0;
@@ -110,7 +110,7 @@ static void test_access(struct device *flash_dev, int i)
 		}
 
 		PRINT("   sector %d %s ...%s", i,
-			STR(k * offset), STR(len + k * len));
+		      STR(k * offset), STR(len + k * len));
 
 		/* check against pattern */
 		for (j = 0; j < len; j++) {
@@ -136,7 +136,10 @@ static void test_access(struct device *flash_dev, int i)
 void main(void)
 {
 	struct device *flash_dev;
+	char *msg = "STM32F4 Flash Test";
 	int rc, i;
+
+	PRINT("\n%s\n", msg);
 
 	flash_dev = device_get_binding("STM32F4_FLASH");
 
@@ -144,10 +147,16 @@ void main(void)
 		PRINT("STM32F4 flash driver was not found!\n");
 		return;
 	}
-	PRINT("\nTest start:\n");
 
-	PRINT("\n - Erasing sectors \n");
+
+	PRINT("\n - Erasing sectors:\n");
 	for (i = 0; i < ARRAY_SIZE(sector); i++ ) {
+
+		if (i < 2) {
+			PRINT("   sector %d %s storing the firmware skipped\n",
+			      i, STR(sector[i].len));
+			continue;
+		}
 
 		rc = flash_erase(flash_dev, sector[i].start, sector[i].len);
 		if (rc < 0) {
@@ -157,8 +166,23 @@ void main(void)
 		}
 	}
 
+	PRINT("\n - Looking for firmware in sector:\n");
+	memset(buffer, 0x00, sizeof(buffer));
+	if (flash_read(flash_dev, (off_t) sector[0].start, (uint8_t *) buffer,
+		       KB(16)) != 0) {
+		PRINT("   Flash read failed\n");
+	} else {
+		if (sstrstr(buffer, msg, KB(16))) {
+			PRINT("   sector %d %s ...%s [FOUND]\n", 0,
+			      STR(0), STR(KB(16)));
+		} else {
+			PRINT("   sector %d %s ...%s [NOT FOUND]\n", 0,
+			      STR(0), STR(KB(16)));
+		}
+	}
+
 	PRINT("\n - Checking all bytes in sectors (read/write)\n");
-	for (i = 0; i < ARRAY_SIZE(sector); i++ ) {
+	for (i = 2; i < ARRAY_SIZE(sector); i++ ) {
 		test_access(flash_dev, i);
 	}
 
