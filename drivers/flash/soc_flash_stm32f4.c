@@ -30,6 +30,7 @@ static const struct flash_map {
       uint32_t len;
       uint16_t id;
 } sector [] = {
+#ifdef CONFIG_SOC_STM32F401RE
 	{ .start = 0x08000000 , .len = KB(16),   .id = 0x0000 },
 	{ .start = 0x08004000 , .len = KB(16),   .id = 0x0008 },
 	{ .start = 0x08008000 , .len = KB(16),   .id = 0x0010 },
@@ -38,6 +39,7 @@ static const struct flash_map {
 	{ .start = 0x08020000 , .len = KB(128),  .id = 0x0028 },
 	{ .start = 0x08040000 , .len = KB(128),  .id = 0x0030 },
 	{ .start = 0x08060000 , .len = KB(128),  .id = 0x0038 },
+#endif
 };
 
 #define MAX_OFFSET  (sector[ARRAY_SIZE(sector) - 1].len + \
