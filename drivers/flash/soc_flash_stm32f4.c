@@ -59,7 +59,7 @@ static inline int addr_valid(off_t offset, size_t len)
 	return 0;
 }
 
-static int check_status(struct stm32f4x_flash *regs)
+static inline int check_status(struct stm32f4x_flash *regs)
 {
 	uint32_t error = 0;
 
@@ -75,7 +75,7 @@ static int check_status(struct stm32f4x_flash *regs)
 	return 0;
 }
 
-static int get_sector(off_t offset)
+static inline int get_sector(off_t offset)
 {
 	uint32_t addr = sector[0].start + offset;
 	int i;
@@ -93,7 +93,7 @@ static int get_sector(off_t offset)
 	return (i - 1);
 }
 
-static int wait_flash_idle(struct stm32f4x_flash *regs)
+static inline int wait_flash_idle(struct stm32f4x_flash *regs)
 {
 	int rc;
 
@@ -130,7 +130,8 @@ static inline void program_byte(uint8_t *p, uint8_t val,
 	regs->ctrl &= (~FLASH_CR_PG);
 }
 
-static int program_flash(uint32_t address, uint8_t data, struct flash_priv *p)
+static inline int program_flash(uint32_t address, uint8_t data,
+				struct flash_priv *p)
 {
 	int rc;
 
@@ -149,7 +150,7 @@ static int program_flash(uint32_t address, uint8_t data, struct flash_priv *p)
 	return rc;
 }
 
-static int erase_sector(uint16_t sector, struct stm32f4x_flash *regs)
+static inline int erase_sector(uint16_t sector, struct stm32f4x_flash *regs)
 {
 	uint32_t tmp;
 	int rc = 0;
@@ -161,7 +162,7 @@ static int erase_sector(uint16_t sector, struct stm32f4x_flash *regs)
 	}
 
 	regs->ctrl &= CR_PSIZE_MASK;
-	regs->ctrl |= FLASH_PSIZE_BYTE;
+	regs->ctrl |= FLASH_PSIZE_WORD;
 	regs->ctrl &= SECTOR_MASK;
 	regs->ctrl |= FLASH_CR_SER | sector;
 
