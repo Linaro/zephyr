@@ -109,7 +109,7 @@ static void test_access(struct device *flash_dev, int i)
 			PRINT("   Flash read failed sector %d\n", i);
 		}
 
-		PRINT("   sector %d %s ...%s", i,
+		PRINT("   sector %d %s -->%s", i,
 		      STR(k * offset), STR(len + k * len));
 
 		/* check against pattern */
@@ -148,25 +148,7 @@ void main(void)
 		return;
 	}
 
-
-	PRINT("\n - Erasing sectors:\n");
-	for (i = 0; i < ARRAY_SIZE(sector); i++ ) {
-
-		if (i < 2) {
-			PRINT("   sector %d %s storing the firmware skipped\n",
-			      i, STR(sector[i].len));
-			continue;
-		}
-
-		rc = flash_erase(flash_dev, sector[i].start, sector[i].len);
-		if (rc < 0) {
-			PRINT("   sector %d %s [FAIL]\n", i, STR(sector[i].len));
-		} else {
-			PRINT("   sector %d %s [OK]\n", i, STR(sector[i].len));
-		}
-	}
-
-	PRINT("\n - Looking for firmware in sector:\n");
+	PRINT("\n - Looking for firmware in sector 0:\n");
 	memset(buffer, 0x00, sizeof(buffer));
 	if (flash_read(flash_dev, (off_t) sector[0].start, (uint8_t *) buffer,
 		       KB(16)) != 0) {
@@ -180,6 +162,24 @@ void main(void)
 			      STR(0), STR(KB(16)));
 		}
 	}
+
+	PRINT("\n - Erasing sectors:\n");
+	for (i = 0; i < ARRAY_SIZE(sector); i++ ) {
+
+		if (i < 2) {
+			PRINT("   sector %d %s firmware present - skipped!\n",
+			      i, STR(sector[i].len));
+			continue;
+		}
+
+		rc = flash_erase(flash_dev, sector[i].start, sector[i].len);
+		if (rc < 0) {
+			PRINT("   sector %d %s [FAIL]\n", i, STR(sector[i].len));
+		} else {
+			PRINT("   sector %d %s [OK]\n", i, STR(sector[i].len));
+		}
+	}
+
 
 	PRINT("\n - Checking all bytes in sectors (read/write)\n");
 	for (i = 2; i < ARRAY_SIZE(sector); i++ ) {
