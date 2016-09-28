@@ -50,6 +50,15 @@ struct flash_priv {
 	struct nano_sem sem;
 };
 
+static inline int addr_valid(off_t offset, size_t len)
+{
+	if ( offset < 0 || offset + len > MAX_OFFSET) {
+		return -1;
+	}
+
+	return 0;
+}
+
 static int check_status(struct stm32f4x_flash *regs)
 {
 	uint32_t error = 0;
@@ -163,6 +172,7 @@ static int erase_sector(uint16_t sector, struct stm32f4x_flash *regs)
  	while (regs->status & FLASH_FLAG_BSY) {
 		continue;
 	}
+
 	rc = wait_flash_idle(regs);
 	if (rc < 0) {
 		SYS_LOG_ERR("erasing sector");
@@ -178,7 +188,8 @@ static int flash_stm32f_erase(struct device *dev, off_t offset, size_t len)
 	int start, end, i;
 	int rc = 0;
 
-	if (offset < 0 || offset + len > MAX_OFFSET) {
+	rc = addr_valid(offset, len);
+	if (rc < 0) {
 		return -1;
 	}
 
@@ -199,8 +210,10 @@ static int flash_stm32f_read(struct device *dev, off_t offset,
 				void *data, size_t len)
 {
 	uint32_t addr = sector[0].start + offset;
+	int rc;
 
-	if (offset < 0 || offset + len > MAX_OFFSET) {
+	rc = addr_valid(offset, len);
+	if (rc < 0) {
 		return -1;
 	}
 
@@ -217,7 +230,8 @@ static int flash_stm32f_write(struct device *dev, off_t offset,
 	const uint8_t *sptr = data;
 	int rc, i;
 
-	if (offset < 0 || offset + len > MAX_OFFSET) {
+	rc = addr_valid(offset, len);
+	if (rc < 0) {
 		return -1;
 	}
 
