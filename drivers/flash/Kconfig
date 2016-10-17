@@ -139,10 +139,24 @@ config SOC_FLASH_STM32F4
 	help
 	  Enables STM32F4 Flash driver
 
+config SOC_FLASH_MK64F12
+	bool "Freescale FRDM K64F flash driver"
+	depends on FLASH && SOC_MK64F12
+	default n
+	help
+	  Enables FRDM K64F Flash driver
+
 config SOC_FLASH_STM32F4_DEV_NAME
 	string "ST STM32F4 flash device name"
 	depends on SOC_FLASH_STM32F4
 	default "STM32F4_FLASH"
+	help
+	  Specify the device name for the flash driver.
+
+config SOC_FLASH_MK64F12_DEV_NAME
+	string "Freescale FRDM K64F flash device name"
+	depends on SOC_FLASH_MK64F12
+	default "MK64F_FLASH"
 	help
 	  Specify the device name for the flash driver.
 
