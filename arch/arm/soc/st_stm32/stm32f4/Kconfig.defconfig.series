@@ -99,4 +99,11 @@ config SPI_1_IRQ_PRI
 
 endif #SPI
 
+if FLASH
+
+config CONFIG_SOC_FLASH_STM32F4
+	def_bool y
+
+endif #FLASH
+
 endif # SOC_SERIES_STM32F4X
