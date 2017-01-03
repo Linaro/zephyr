@@ -22,7 +22,7 @@
 #include <device.h>
 #include <errno.h>
 
-#include <misc/sys_log.h>
+#include <logging/sys_log.h>
 #include <sys_io.h>
 #include <board.h>
 #include <init.h>
