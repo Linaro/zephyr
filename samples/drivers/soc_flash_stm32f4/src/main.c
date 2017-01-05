@@ -18,7 +18,7 @@
 #include <flash.h>
 #include <device.h>
 #include <string.h>
-#include <misc/sys_log.h>
+#include <logging/sys_log.h>
 
 static const struct flash_map {
 	uint32_t start;
