@@ -18,7 +18,6 @@
 
 #define SYS_LOG_LEVEL CONFIG_SYS_LOG_SPI_LEVEL
 
-#include <nanokernel.h>
 #include <device.h>
 #include <errno.h>
 
@@ -73,7 +72,6 @@ static void spis_nrf5_print_cfg_registers(struct device *dev)
 static int spis_nrf5_configure(struct device *dev, struct spi_config *config)
 {
 	volatile struct spi_slave_nrf5 *spi_regs = SPI_REGS(dev);
-	struct spi_nrf5_data *priv_data = DEV_DATA(dev);
 	uint32_t flags;
 
 	/* make sure module is disabled */
@@ -100,13 +98,6 @@ static int spis_nrf5_configure(struct device *dev, struct spi_config *config)
 	spi_regs->CONFIG = (flags & SPI_TRANSFER_LSB) ? (1 << 0) : 0;
 	spi_regs->CONFIG |= (flags & SPI_MODE_CPHA) ? (1 << 1) : 0;
 	spi_regs->CONFIG |= (flags & SPI_MODE_CPOL) ? (1 << 2) : 0;
-
-	/* Initialize driver's Tx/Rx queues and frame size */
-	priv_data->tx_buf_len = 0;
-	priv_data->rx_buf_len = 0;
-	priv_data->frame_sz = 8;
-	priv_data->tx_buf = NULL;
-	priv_data->rx_buf = NULL;
 
 	/* Enable the SPIS - peripherals sharing same ID will be disabled */
 	spi_regs->ENABLE = SPIS_NRF5_ENABLE;
@@ -148,28 +139,17 @@ static int spis_nrf5_transceive(struct device *dev, const void *tx_buf,
 		return -EINVAL;
 	}
 
-	/* Set buffers info */
-	priv_data->tx_buf_len = tx_buf_len;
-	priv_data->rx_buf_len = rx_buf_len;
-	priv_data->tx_buf = tx_buf;
-	priv_data->rx_buf = rx_buf;
-
-	priv_data->trans_len = max(tx_buf_len, rx_buf_len);
-	priv_data->transmitted = 0;
-	priv_data->received = 0;
 	priv_data->error = 0;
 
-	SYS_LOG_DBG("semstat: 0x%x", spi_regs->SEMSTAT);
-
-	if (spi_regs->EVENTS_ACQUIRED == 1) {
-		spi_regs->TXD_PTR = (uint32_t) priv_data->tx_buf;
-		spi_regs->RXD_PTR = (uint32_t) priv_data->rx_buf;
-		spi_regs->TXD_MAXCNT = priv_data->tx_buf_len;
-		spi_regs->RXD_MAXCNT = priv_data->rx_buf_len;
+	if (spi_regs->SEMSTAT == 1) {
+		spi_regs->TXD_PTR = (uint32_t) tx_buf;
+		spi_regs->RXD_PTR = (uint32_t) rx_buf;
+		spi_regs->TXD_MAXCNT = tx_buf_len;
+		spi_regs->RXD_MAXCNT = rx_buf_len;
 		spi_regs->TASKS_RELEASE = 1;
 	} else {
-		/* Wait for the semaphore to assign buffers */
-		spi_regs->TASKS_ACQUIRE = 1;
+		SYS_LOG_ERR("SEM not allocated to the CPU, transfer still in progress?");
+		return -EIO;
 	}
 
 	/* wait for transfer to complete */
@@ -213,18 +193,15 @@ static void spis_nrf5_isr(void *arg)
 {
 	struct device *dev = arg;
 	volatile struct spi_slave_nrf5 *spi_regs = SPI_REGS(dev);
-	struct spi_nrf5_data *priv_data = DEV_DATA(dev);
 	uint32_t error = 0;
 	uint32_t tmp;
 
-	SYS_LOG_DBG("SPI Slave driver ISR");
-
 	/* We get an interrupt for the following reasons:
 	 * 1. Semapthore ACQUIRED:
-	 *      Allows start of a transceive where the buffers are "handed over"
-	 *      to the SPI module
+	 *      Semaphore is assigned to the CPU again (always happens
+	 *      after END if the END_ACQUIRE SHORTS is set)
 	 * 2. End of Granted SPI transaction:
-	 *      So we can swap out buffers if needed
+	 *      Used to unblocked the caller, finishing the transaction
 	 */
 
 	/* NOTE:
@@ -233,31 +210,17 @@ static void spis_nrf5_isr(void *arg)
 	 * re-occurring
 	 */
 
-	if (spi_regs->EVENTS_ACQUIRED) {
-		SYS_LOG_DBG("EVENTS_ACQUIRED: semstat: 0x%x",
-			    spi_regs->SEMSTAT);
-		spi_regs->EVENTS_ACQUIRED = 0;
-
-		/* force registesr flush (per spec) */
-		tmp = spi_regs->EVENTS_ACQUIRED;
-
-		/* update buffers */
-		spi_regs->RXD_PTR = (uint32_t) priv_data->rx_buf;
-		spi_regs->TXD_PTR = (uint32_t) priv_data->tx_buf;
-		spi_regs->TXD_MAXCNT = priv_data->tx_buf_len;
-		spi_regs->RXD_MAXCNT = priv_data->rx_buf_len;
-
-		spi_regs->TASKS_RELEASE = 1;
-	}
-
 	if (spi_regs->EVENTS_END) {
-		SYS_LOG_DBG("EVENTS_END: semstat: 0x%x", spi_regs->SEMSTAT);
 		spi_regs->EVENTS_END = 0;
-
 		/* force register flush (per spec) */
 		tmp = spi_regs->EVENTS_END;
 
 		spis_nrf5_complete(dev, error);
+	}
+	if (spi_regs->EVENTS_ACQUIRED) {
+		spi_regs->EVENTS_ACQUIRED = 0;
+		/* force registesr flush (per spec) */
+		tmp = spi_regs->EVENTS_ACQUIRED;
 	}
 }
 
