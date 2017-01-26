@@ -89,7 +89,7 @@ static int spis_nrf5_configure(struct device *dev, struct spi_config *config)
 			       SPIS_INTENSET_END_Msk);
 
 	/* default transmit and over-read characters */
-	spi_regs->DEF = 0x00000055;
+	spi_regs->DEF = CONFIG_SPI_0_NRF5_DEF;
 	spi_regs->ORC = 0x000000AA;
 
 	/* user configuration */
