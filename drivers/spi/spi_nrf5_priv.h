@@ -32,15 +32,7 @@ struct spi_nrf5_config {
 };
 
 struct spi_nrf5_data {
-	uint32_t transmitted;
-	uint32_t received;
-	uint8_t frame_sz;		/* frame/word size, in bits */
-	uint8_t tx_buf_len;
-	uint8_t rx_buf_len;
-	uint8_t trans_len;
 	uint8_t error;
-	const uint8_t *tx_buf;
-	uint8_t *rx_buf;
 	struct k_sem device_sync_sem;	/* synchronisation semaphore */
 };
 
