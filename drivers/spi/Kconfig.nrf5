@@ -53,4 +53,12 @@ config SPI_0_NRF5_GPIO_MISO
 	help
 	  There are 32 GPIO pins on the nRF5X SoCs. Range is between 0 and 31.
 
+config SPI_0_NRF5_DEF
+	hex "Default character"
+	depends on SPI_NRF5
+	default 0
+	help
+	  Default character. Character clocked out in case of an ignored
+	  transaction.
+
 endif # SPI_NRF5
