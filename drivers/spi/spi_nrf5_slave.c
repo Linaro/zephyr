@@ -126,7 +126,7 @@ static int spis_nrf5_transceive(struct device *dev, const void *tx_buf,
 	volatile struct spi_slave_nrf5 *spi_regs = SPI_REGS(dev);
 	struct spi_nrf5_data *priv_data = DEV_DATA(dev);
 
-	__ASSERT(!(tx_buf_len && !tx_buf  || rx_buf_len && !rx_buf),
+	__ASSERT(!((tx_buf_len && !tx_buf) || (rx_buf_len && !rx_buf)),
 		"spi_nrf5_transceive: ERROR - NULL buffers");
 
 	/* Buffer needs to be in RAM for EasyDMA to work */
