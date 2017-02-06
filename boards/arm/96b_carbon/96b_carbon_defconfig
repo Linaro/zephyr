@@ -15,9 +15,6 @@ CONFIG_UART_CONSOLE_ON_DEV_NAME="UART_1"
 # enable pinmux
 CONFIG_PINMUX=y
 
-# enable SPI
-CONFIG_SPI=y
-
 # enable GPIO ports A, B, C, D
 CONFIG_GPIO=y
 CONFIG_GPIO_STM32_PORTD=y
