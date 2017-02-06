@@ -10,4 +10,11 @@ if BOARD_96B_CARBON
 config BOARD
 	default 96b_carbon
 
+if BLUETOOTH
+
+config SPI
+	default y
+
+endif # BLUETOOTH
+
 endif # BOARD_96B_CARBON
