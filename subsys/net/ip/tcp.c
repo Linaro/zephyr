@@ -693,8 +693,16 @@ void net_tcp_ack_received(struct net_context *ctx, uint32_t ack)
 
 		seq = sys_get_be32(tcphdr->seq) + net_nbuf_appdatalen(buf) - 1;
 
-		if (!seq_greater(ack, seq)) {
-			break;
+		/*
+		 * In some instances we receive an ACK packet with seq 0 after
+		 * we've entered LAST_ACK state.  Processing is still needed
+		 * so we can remove this packet from the send_list, so skip
+		 * the below check for this case.
+		 */
+		if (net_tcp_get_state(tcp) < NET_TCP_LAST_ACK) {
+			if (!seq_greater(ack, seq)) {
+				break;
+			}
 		}
 
 		if (tcphdr->flags & NET_TCP_FIN) {
