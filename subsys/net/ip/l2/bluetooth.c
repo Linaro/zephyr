@@ -32,8 +32,6 @@
 #include <bluetooth/uuid.h>
 #include <bluetooth/l2cap.h>
 
-#include "ipv6.h"
-
 #define L2CAP_IPSP_PSM 0x0023
 #define L2CAP_IPSP_MTU 1280
 
