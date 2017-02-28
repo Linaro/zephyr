@@ -296,7 +296,7 @@ void publisher(void)
 	/* Publisher apps TX the MQTT PUBLISH msg */
 	client_ctx.mqtt_ctx.publish_tx = publish_cb;
 
-	rc = mqtt_init(&client_ctx.mqtt_ctx, MQTT_APP_PUBLISHER);
+	rc = mqtt_init(&client_ctx.mqtt_ctx);
 	PRINT_RESULT("mqtt_init", rc);
 	if (rc != 0) {
 		goto exit_app;

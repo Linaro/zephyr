@@ -815,7 +815,7 @@ int mqtt_unpack_suback(uint8_t *buf, uint16_t length, uint16_t *pkt_id,
 	*pkt_id = ntohs(val_u16);
 	offset += PACKET_ID_SIZE;
 
-	*items = length - offset;
+	*items = rlen - PACKET_ID_SIZE;
 
 	/* no enough space to store the QoS				*/
 	if (*items > elements) {

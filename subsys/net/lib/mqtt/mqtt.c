@@ -474,15 +474,8 @@ int mqtt_rx_pub_msgs(struct mqtt_ctx *ctx, struct net_buf *rx,
 		return -EINVAL;
 	}
 
-	/* Only MQTT_APP_SUBSCRIBER, MQTT_APP_PUBLISHER_SUBSCRIBER and
-	 * MQTT_APP_SERVER apps must receive the MQTT_PUBREL msg.
-	 */
 	if (type == MQTT_PUBREL) {
-		if (ctx->app_type != MQTT_APP_PUBLISHER) {
-			rc = ctx->publish_rx(ctx, NULL, pkt_id, MQTT_PUBREL);
-		} else {
-			rc = -EINVAL;
-		}
+		rc = ctx->publish_rx(ctx, NULL, pkt_id, MQTT_PUBREL);
 	} else {
 		rc = ctx->publish_tx(ctx, pkt_id, type);
 	}
@@ -501,26 +494,6 @@ int mqtt_rx_pub_msgs(struct mqtt_ctx *ctx, struct net_buf *rx,
 	}
 
 	return 0;
-}
-
-int mqtt_rx_puback(struct mqtt_ctx *ctx, struct net_buf *rx)
-{
-	return mqtt_rx_pub_msgs(ctx, rx, MQTT_PUBACK);
-}
-
-int mqtt_rx_pubcomp(struct mqtt_ctx *ctx, struct net_buf *rx)
-{
-	return mqtt_rx_pub_msgs(ctx, rx, MQTT_PUBCOMP);
-}
-
-int mqtt_rx_pubrec(struct mqtt_ctx *ctx, struct net_buf *rx)
-{
-	return mqtt_rx_pub_msgs(ctx, rx, MQTT_PUBREC);
-}
-
-int mqtt_rx_pubrel(struct mqtt_ctx *ctx, struct net_buf *rx)
-{
-	return mqtt_rx_pub_msgs(ctx, rx, MQTT_PUBREL);
 }
 
 int mqtt_rx_pingresp(struct mqtt_ctx *ctx, struct net_buf *rx)
@@ -688,11 +661,10 @@ exit_error:
  * @retval 0 on success
  * @retval -EINVAL if an unknown message is received
  * @retval -ENOMEM if no data buffer is available
- * @retval mqtt_rx_connack, mqtt_rx_puback, mqtt_rx_pubrec, mqtt_rx_pubcomp
- *         and mqtt_rx_pingresp return codes
+ * @retval return code from packet type specific sub function call
  */
 static
-int mqtt_publisher_parser(struct mqtt_ctx *ctx, struct net_buf *rx)
+int mqtt_parser(struct mqtt_ctx *ctx, struct net_buf *rx)
 {
 	uint16_t pkt_type = MQTT_INVALID;
 	struct net_buf *data = NULL;
@@ -715,80 +687,16 @@ int mqtt_publisher_parser(struct mqtt_ctx *ctx, struct net_buf *rx)
 		}
 		break;
 	case MQTT_PUBACK:
-		rc = mqtt_rx_puback(ctx, data);
-		break;
 	case MQTT_PUBREC:
-		rc = mqtt_rx_pubrec(ctx, data);
-		break;
 	case MQTT_PUBCOMP:
-		rc = mqtt_rx_pubcomp(ctx, data);
+	case MQTT_PUBREL:
+		rc = mqtt_rx_pub_msgs(ctx, data, pkt_type);
 		break;
 	case MQTT_PINGRESP:
 		rc = mqtt_rx_pingresp(ctx, data);
 		break;
-	default:
-		rc = -EINVAL;
-		break;
-	}
-
-exit_parser:
-	if (rc != 0 && ctx->malformed) {
-		ctx->malformed(ctx, pkt_type);
-	}
-
-	net_nbuf_unref(data);
-
-	return rc;
-}
-
-
-/**
- * Calls the appropriate rx routine for the MQTT message contained in rx
- *
- * @details On error, this routine will execute the 'ctx->malformed' callback
- * (if defined)
- *
- * @param ctx MQTT context
- * @param rx RX buffer
- *
- * @retval 0 on success
- * @retval -EINVAL if an unknown message is received
- * @retval -ENOMEM if no data buffer is available
- * @retval mqtt_rx_publish, mqtt_rx_pubrel, mqtt_rx_pubrel and mqtt_rx_suback
- *         return codes
- */
-static
-int mqtt_subscriber_parser(struct mqtt_ctx *ctx, struct net_buf *rx)
-{
-	uint16_t pkt_type = MQTT_INVALID;
-	struct net_buf *data = NULL;
-	int rc = 0;
-
-	data = mqtt_linearize_buffer(ctx, rx, MQTT_PUBLISHER_MIN_MSG_SIZE);
-	if (!data) {
-		rc = -EINVAL;
-		goto exit_parser;
-	}
-
-	pkt_type = MQTT_PACKET_TYPE(data->data[0]);
-
-	switch (pkt_type) {
-	case MQTT_CONNACK:
-		if (!ctx->connected) {
-			rc = mqtt_rx_connack(ctx, data, ctx->clean_session);
-		} else {
-			rc = -EINVAL;
-		}
-
-		break;
 	case MQTT_PUBLISH:
 		rc = mqtt_rx_publish(ctx, data);
-		break;
-	case MQTT_PUBREL:
-		rc = mqtt_rx_pubrel(ctx, data);
-		break;
-	case MQTT_PINGRESP:
-		rc = mqtt_rx_pubrel(ctx, data);
 		break;
 	case MQTT_SUBACK:
 		rc = mqtt_rx_suback(ctx, data);
@@ -831,29 +739,17 @@ lb_exit:
 	net_nbuf_unref(buf);
 }
 
-int mqtt_init(struct mqtt_ctx *ctx, enum mqtt_app app_type)
+int mqtt_init(struct mqtt_ctx *ctx)
 {
 	/* So far, only clean session = 1 is supported */
 	ctx->clean_session = 1;
 	ctx->connected = 0;
+	ctx->rcv = mqtt_parser;
 
 	/* Install the receiver callback, timeout is set to K_NO_WAIT.
 	 * In this case, no return code is evaluated.
 	 */
 	(void)net_context_recv(ctx->net_ctx, mqtt_recv, K_NO_WAIT, ctx);
-
-	ctx->app_type = app_type;
-
-	switch (ctx->app_type) {
-	case MQTT_APP_PUBLISHER:
-		ctx->rcv = mqtt_publisher_parser;
-		break;
-	case MQTT_APP_SUBSCRIBER:
-		ctx->rcv = mqtt_subscriber_parser;
-		break;
-	default:
-		return -EINVAL;
-	}
 
 	return 0;
 }
