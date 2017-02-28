@@ -17,20 +17,6 @@
  */
 
 /**
- * MQTT application type
- */
-enum mqtt_app {
-	/** Publisher and Subscriber application */
-	MQTT_APP_PUBLISHER_SUBSCRIBER,
-	/** Publisher only application */
-	MQTT_APP_PUBLISHER,
-	/** Subscriber only application */
-	MQTT_APP_SUBSCRIBER,
-	/** MQTT Server */
-	MQTT_APP_SERVER
-};
-
-/**
  * MQTT context structure
  *
  * @details Context structure for the MQTT high-level API with support for QoS.
@@ -42,9 +28,10 @@ enum mqtt_app {
  *
  * http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html
  *
- * For example, assume that Zephyr is operating as a MQTT_APP_SUBSCRIBER, so it
- * may receive the MQTT PUBLISH and MQTT PUBREL (QoS2) messages. Once the
- * messages are parsed and validated, the #publish_rx callback is executed.
+ * For example, assume that Zephyr is operating as a MQTT subscriber.
+ * Unsolicited MQTT PUBLISH and MQTT PUBREL (QoS2) messages should be rejected.
+ * Once the messages are parsed and validated, the #publish_rx callback is
+ * executed.
  *
  * Internally, the #publish_rx callback must store the #mqtt_publish_msg message
  * when a MQTT PUBLISH msg is received. When a MQTT PUBREL message is received,
@@ -72,8 +59,7 @@ struct mqtt_ctx {
 	 */
 	void (*disconnect)(struct mqtt_ctx *ctx);
 
-	/** Callback executed when a #MQTT_APP_PUBLISHER application receives
-	 * a MQTT PUBxxxx msg.
+	/** Callback executed when a MQTT PUBxxxx msg is received.
 	 * If type is MQTT_PUBACK, MQTT_PUBCOMP or MQTT_PUBREC, this callback
 	 * must return 0 if pkt_id matches the packet id of a previously
 	 * received MQTT_PUBxxx message. If this callback returns 0, the caller
@@ -91,13 +77,12 @@ struct mqtt_ctx {
 	int (*publish_tx)(struct mqtt_ctx *ctx, uint16_t pkt_id,
 			  enum mqtt_packet type);
 
-	/** Callback executed when a MQTT_APP_SUBSCRIBER,
-	 * MQTT_APP_PUBLISHER_SUBSCRIBER or MQTT_APP_SERVER applications receive
-	 * a MQTT PUBxxxx msg. If this callback returns 0, the caller will
-	 * continue. If type is MQTT_PUBREL this callback must return 0 if
-	 * pkt_id matches the packet id of a previously received MQTT_PUBxxx
-	 * message. Any other value will stop the QoS handshake and the caller
-	 * will return -EINVAL
+	/** Callback executed when a MQTT PUBxxxx msg is received.
+	 * If this callback returns 0, the caller will continue.
+	 * If type is MQTT_PUBREL this callback must return 0 if pkt_id
+	 * matches the packet id of a previously received MQTT_PUBxxx message.
+	 * Any other value will stop the QoS handshake and the caller will
+	 * return -EINVAL
 	 *
 	 * <b>Note: this callback must be not NULL</b>
 	 *
@@ -110,8 +95,7 @@ struct mqtt_ctx {
 	int (*publish_rx)(struct mqtt_ctx *ctx, struct mqtt_publish_msg *msg,
 			  uint16_t pkt_id, enum mqtt_packet type);
 
-	/** Callback executed when a MQTT_APP_SUBSCRIBER or
-	 * MQTT_APP_PUBLISHER_SUBSCRIBER receives the MQTT SUBACK message
+	/** Callback executed when a MQTT SUBACK msg is received.
 	 * If this callback returns 0, the caller will continue. Any other
 	 * value will make the caller return -EINVAL.
 	 *
@@ -125,8 +109,7 @@ struct mqtt_ctx {
 	int (*subscribe)(struct mqtt_ctx *ctx, uint16_t pkt_id,
 			 uint8_t items, enum mqtt_qos qos[]);
 
-	/** Callback executed when a MQTT_APP_SUBSCRIBER or
-	 * MQTT_APP_PUBLISHER_SUBSCRIBER receives the MQTT UNSUBACK message
+	/** Callback executed when a MQTT UNSUBACK msg is received.
 	 * If this callback returns 0, the caller will continue. Any other value
 	 * will make the caller return -EINVAL
 	 *
@@ -150,9 +133,6 @@ struct mqtt_ctx {
 	/* Internal use only */
 	int (*rcv)(struct mqtt_ctx *ctx, struct net_buf *);
 
-	/** Application type, see: enum mqtt_app */
-	uint8_t app_type;
-
 	/* Clean session is also part of the MQTT CONNECT msg, however app
 	 * behavior is influenced by this parameter, so we keep a copy here
 	 */
@@ -167,10 +147,9 @@ struct mqtt_ctx {
  * Initializes the MQTT context structure
  *
  * @param ctx MQTT context structure
- * @param app_type See enum mqtt_app
  * @retval 0, always.
  */
-int mqtt_init(struct mqtt_ctx *ctx, enum mqtt_app app_type);
+int mqtt_init(struct mqtt_ctx *ctx);
 
 /**
  * Sends the MQTT CONNECT message

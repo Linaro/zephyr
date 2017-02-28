@@ -474,15 +474,8 @@ int mqtt_rx_pub_msgs(struct mqtt_ctx *ctx, struct net_buf *rx,
 		return -EINVAL;
 	}
 
-	/* Only MQTT_APP_SUBSCRIBER, MQTT_APP_PUBLISHER_SUBSCRIBER and
-	 * MQTT_APP_SERVER apps must receive the MQTT_PUBREL msg.
-	 */
 	if (type == MQTT_PUBREL) {
-		if (ctx->app_type != MQTT_APP_PUBLISHER) {
-			rc = ctx->publish_rx(ctx, NULL, pkt_id, MQTT_PUBREL);
-		} else {
-			rc = -EINVAL;
-		}
+		rc = ctx->publish_rx(ctx, NULL, pkt_id, MQTT_PUBREL);
 	} else {
 		rc = ctx->publish_tx(ctx, pkt_id, type);
 	}
@@ -746,13 +739,11 @@ lb_exit:
 	net_nbuf_unref(buf);
 }
 
-int mqtt_init(struct mqtt_ctx *ctx, enum mqtt_app app_type)
+int mqtt_init(struct mqtt_ctx *ctx)
 {
 	/* So far, only clean session = 1 is supported */
 	ctx->clean_session = 1;
 	ctx->connected = 0;
-
-	ctx->app_type = app_type;
 	ctx->rcv = mqtt_parser;
 
 	/* Install the receiver callback, timeout is set to K_NO_WAIT.
