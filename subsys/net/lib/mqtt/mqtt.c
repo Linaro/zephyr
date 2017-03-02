@@ -312,7 +312,6 @@ int mqtt_tx_subscribe(struct mqtt_ctx *ctx, uint16_t pkt_id, uint8_t items,
 
 	rc = net_context_send(tx, NULL, ctx->net_timeout, NULL, NULL);
 	if (rc < 0) {
-		rc = -EIO;
 		net_nbuf_unref(tx);
 	}
 
