@@ -31,13 +31,22 @@
 #define DEV_DATA(dev) ((struct temp_stm32_data *)(dev)->driver_data)
 
 /*
+ * HACK: absent a better way to learn the analog voltage reference on
+ * the board we are running on, hard-code V_REF+ to 3.3V, and assume
+ * V_REF- = 0V.
+ */
+#define VREF_MILLIVOLTS 3300
+#define VREF_VOLTS ((float)VREF_MILLIVOLTS / 1000.0f)
+
+/*
  * See STM32F401xD, STM32F401xE datasheet 6.3.21 and chip
  * reference manual and ST RM0368 chapter 11.
  */
-#define STM32F401_V25		0.76f
-#define STM32F401_AVG_SLOPE	2.5f
+#define STM32F401_V25		0.76f	/* volts */
+#define STM32F401_AVG_SLOPE	0.0025f /* volts / (degree C) */
 
 #define ADC_RESOLUTION_12BIT 0x00
+#define ADC_TO_VOLTS(adc_val) ((float)(adc_val) * VREF_VOLTS / 4095.0f)
 #define ADC_PRESCALER_PCLK_DIV_8 0x03
 #define ADC_SAMPLE_480_CYCLES 0x07
 #define ADC_ONE_CONVERSION 0x00
@@ -135,10 +144,9 @@ static int temp_stm32f401x_sample_fetch(struct device *dev,
 	return 0;
 }
 
-static inline float stm32f401x_temp_c(uint32_t v_sense)
+static inline float stm32f401x_temp_c(float v_sense)
 {
-	float sense = (float)v_sense;
-	return ((sense - STM32F401_V25) / STM32F401_AVG_SLOPE + 25.0f);
+	return ((v_sense - STM32F401_V25) / STM32F401_AVG_SLOPE + 25.0f);
 }
 
 static int temp_stm32f401x_channel_get(struct device *dev,
@@ -147,7 +155,8 @@ static int temp_stm32f401x_channel_get(struct device *dev,
 {
 	const struct temp_stm32_config *cfg = DEV_CFG(dev);
 	ADC_TypeDef *adc = cfg->adc;
-	uint32_t v_sense = adc->DR;
+	uint32_t adc_dr = adc->DR;
+	float v_sense = ADC_TO_VOLTS(adc_dr);
 	float deg_c = stm32f401x_temp_c(v_sense);
 
 	/* TODO fractional part */
