@@ -125,12 +125,12 @@ static int temp_stm32f401x_sample_fetch(struct device *dev,
 	 * Start the ADC conversion, and wait for it to complete.
 	 */
 
-	adc->SR = ~ADC_SR_EOC;
+	adc->SR = ~(ADC_SR_EOC | ADC_SR_STRT);
 	adc->CR2 |= ADC_CR2_SWSTART;
 
 	do {
 	} while (!(adc->SR & ADC_SR_EOC));
-	adc->SR = ~ADC_SR_EOC;
+	adc->SR = ~(ADC_SR_EOC | ADC_SR_STRT);
 
 	return 0;
 }
