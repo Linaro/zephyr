@@ -184,7 +184,7 @@ static int temp_stm32f401x_init(struct device *dev)
 			 (clock_control_subsys_t*)&cfg->pclken);
 
 	/* Turn on ADC. */
-	adc->CR2 |= (ADC_CR2_ADON << ADC_CR2_ADON_Pos);
+	adc->CR2 |= ADC_CR2_ADON;
 
 	/* ADC configuration for temperature sensor.
 	 *
@@ -195,10 +195,9 @@ static int temp_stm32f401x_init(struct device *dev)
 	 *   mutually exclusive, and VBAT has precedence).
 	 */
 	tmp = adc_common->CCR;
-	tmp |= (ADC_CCR_TSVREFE << ADC_CCR_TSVREFE_Pos);
-	tmp &= ~(ADC_CCR_ADCPRE << ADC_CCR_ADCPRE_Pos);
-	tmp |= (ADC_PRESCALER_PCLK_DIV_8 << ADC_CCR_ADCPRE_Pos);
-	tmp &= ~(ADC_CCR_VBATE << ADC_CCR_VBATE_Pos);
+	tmp &= ~(ADC_CCR_VBATE | ADC_CCR_ADCPRE);
+	tmp |= ((ADC_PRESCALER_PCLK_DIV_8 << ADC_CCR_ADCPRE_Pos) |
+		ADC_CCR_TSVREFE);
 	adc_common->CCR = tmp;
 
 	return 0;
