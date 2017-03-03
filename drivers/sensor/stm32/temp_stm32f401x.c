@@ -146,6 +146,20 @@ static int temp_stm32f401x_sample_fetch(struct device *dev,
 
 static inline float stm32f401x_temp_c(float v_sense)
 {
+	/*
+	 * The voltage read by the temperature sensor, v_sense, is a
+	 * linear function of the temperature. The point-slope form of
+	 * the line is:
+	 *
+	 * (Temperature - 25.0°C) * Avg_Slope = v_sense - V_25
+	 *
+	 * Where V_25 is the measured voltage at 25°C, and Avg_Slope
+	 * is the slope of the line in V/°C.
+	 *
+	 * Use this formula to convert the voltage to a
+	 * temperature. See ST RM0368 11.9 and the chip datasheet for
+	 * more details.
+	 */
 	return ((v_sense - STM32F401_V25) / STM32F401_AVG_SLOPE + 25.0f);
 }
 
